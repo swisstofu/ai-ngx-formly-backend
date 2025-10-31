@@ -5,16 +5,16 @@
       "type": "input",
       "props": {
         "label": "Prénom",
-        "placeholder": "Enter first name",
+        "placeholder": "Entrez votre prénom",
         "required": true,
-        "minLength": 2,
+        "minLength": 4,
         "pattern": "^[a-zA-ZÀ-ÿ\\s'-]+$"
       },
       "validation": {
         "messages": {
-          "pattern": "Only letters, spaces, hyphens, and apostrophes are allowed",
-          "minLength": "First name must be at least 2 characters",
-          "required": "First name is required"
+          "pattern": "Seules les lettres, espaces, tirets et apostrophes sont autorisés",
+          "minLength": "Le prénom doit contenir au moins 4 caractères",
+          "required": "Le prénom est requis"
         }
       }
     },
@@ -22,17 +22,17 @@
       "key": "lastName",
       "type": "input",
       "props": {
-        "label": "Last Name",
-        "placeholder": "Enter last name",
+        "label": "Nom",
+        "placeholder": "Entrez votre nom",
         "required": true,
-        "minLength": 2,
+        "minLength": 4,
         "pattern": "^[a-zA-ZÀ-ÿ\\s'-]+$"
       },
       "validation": {
         "messages": {
-          "pattern": "Only letters, spaces, hyphens, and apostrophes are allowed",
-          "minLength": "Last name must be at least 2 characters",
-          "required": "Last name is required"
+          "pattern": "Seules les lettres, espaces, tirets et apostrophes sont autorisés",
+          "minLength": "Le nom doit contenir au moins 4 caractères",
+          "required": "Le nom est requis"
         }
       }
     },
@@ -41,15 +41,15 @@
       "type": "input",
       "props": {
         "label": "Email",
-        "placeholder": "Enter email",
+        "placeholder": "Entrez votre email",
         "type": "email",
         "required": true,
         "pattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"
       },
       "validation": {
         "messages": {
-          "pattern": "Please enter a valid email address",
-          "required": "Email is required"
+          "pattern": "Veuillez entrer une adresse email valide",
+          "required": "L'email est requis"
         }
       }
     },
@@ -57,20 +57,20 @@
       "key": "country",
       "type": "select",
       "props": {
-        "label": "Country",
-        "placeholder": "Select country",
+        "label": "Pays",
+        "placeholder": "Sélectionnez un pays",
         "required": true,
         "options": [
-          { "label": "United States", "value": "us" },
+          { "label": "États-Unis", "value": "us" },
           { "label": "Canada", "value": "ca" },
-          { "label": "United Kingdom", "value": "uk" },
-          { "label": "Germany", "value": "de" },
+          { "label": "Royaume-Uni", "value": "uk" },
+          { "label": "Allemagne", "value": "de" },
           { "label": "France", "value": "fr" }
         ]
       },
       "validation": {
         "messages": {
-          "required": "Please select a country"
+          "required": "Veuillez sélectionner un pays"
         }
       }
     },
@@ -78,13 +78,13 @@
       "key": "state",
       "type": "select",
       "props": {
-        "label": "State/Province",
-        "placeholder": "Select state",
+        "label": "État/Province",
+        "placeholder": "Sélectionnez un état",
         "options": [
-          { "label": "California", "value": "ca" },
+          { "label": "Californie", "value": "ca" },
           { "label": "New York", "value": "ny" },
           { "label": "Texas", "value": "tx" },
-          { "label": "Florida", "value": "fl" }
+          { "label": "Floride", "value": "fl" }
         ]
       },
       "expressions": {
@@ -101,17 +101,17 @@
       "key": "age",
       "type": "input",
       "props": {
-        "label": "Age",
-        "placeholder": "Enter age",
+        "label": "Âge",
+        "placeholder": "Entrez votre âge",
         "type": "number",
         "min": 0,
         "max": 120
       },
       "validation": {
         "messages": {
-          "required": "Age is required for US residents",
-          "min": "Age must be at least 0",
-          "max": "Age must be less than 120"
+          "required": "L'âge est requis pour les résidents américains",
+          "min": "L'âge doit être au moins 0",
+          "max": "L'âge doit être inférieur à 120"
         }
       },
       "expressions": {
@@ -126,7 +126,7 @@
       "key": "hasLicense",
       "type": "checkbox",
       "props": {
-        "label": "Do you have a driver's license?"
+        "label": "Avez-vous un permis de conduire ?"
       },
       "expressions": {
         "hide": {
@@ -140,14 +140,14 @@
       "key": "licenseNumber",
       "type": "input",
       "props": {
-        "label": "License Number",
-        "placeholder": "Enter license number",
+        "label": "Numéro de permis",
+        "placeholder": "Entrez votre numéro de permis",
         "pattern": "^[A-Z0-9]{6,12}$"
       },
       "validation": {
         "messages": {
-          "pattern": "License number must be 6-12 uppercase letters or numbers",
-          "required": "License number is required"
+          "pattern": "Le numéro de permis doit contenir 6 à 12 lettres majuscules ou chiffres",
+          "required": "Le numéro de permis est requis"
         }
       },
       "expressions": {
@@ -167,14 +167,14 @@
       "key": "employmentStatus",
       "type": "select",
       "props": {
-        "label": "Employment Status",
-        "placeholder": "Select employment status",
+        "label": "Statut d'emploi",
+        "placeholder": "Sélectionnez votre statut d'emploi",
         "options": [
-          { "label": "Employed", "value": "employed" },
-          { "label": "Self-Employed", "value": "self-employed" },
-          { "label": "Unemployed", "value": "unemployed" },
-          { "label": "Student", "value": "student" },
-          { "label": "Retired", "value": "retired" }
+          { "label": "Employé", "value": "employed" },
+          { "label": "Travailleur indépendant", "value": "self-employed" },
+          { "label": "Sans emploi", "value": "unemployed" },
+          { "label": "Étudiant", "value": "student" },
+          { "label": "Retraité", "value": "retired" }
         ]
       },
       "expressions": {
@@ -189,9 +189,15 @@
       "key": "companyName",
       "type": "input",
       "props": {
-        "label": "Company Name",
-        "placeholder": "Enter company name",
+        "label": "Nom de l'entreprise",
+        "placeholder": "Entrez le nom de l'entreprise",
         "minLength": 2
+      },
+      "validation": {
+        "messages": {
+          "required": "Le nom de l'entreprise est requis",
+          "minLength": "Le nom de l'entreprise doit contenir au moins 2 caractères"
+        }
       },
       "expressions": {
         "hide": {
@@ -218,10 +224,16 @@
       "key": "annualIncome",
       "type": "input",
       "props": {
-        "label": "Annual Income",
-        "placeholder": "Enter annual income",
+        "label": "Revenu annuel",
+        "placeholder": "Entrez votre revenu annuel",
         "type": "number",
         "min": 0
+      },
+      "validation": {
+        "messages": {
+          "required": "Le revenu annuel est requis",
+          "min": "Le revenu annuel doit être au moins 0"
+        }
       },
       "expressions": {
         "hide": {
@@ -253,8 +265,8 @@
       "key": "comments",
       "type": "textarea",
       "props": {
-        "label": "Additional Comments",
-        "placeholder": "Enter any additional information",
+        "label": "Commentaires supplémentaires",
+        "placeholder": "Entrez toute information supplémentaire",
         "rows": 4
       }
     }

@@ -13,11 +13,14 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * REST Controller for handling form submissions
- *
+ * <p>
  * Provides endpoints for:
  * - Retrieving form configuration
  * - Submitting form data with validation
@@ -35,49 +38,54 @@ public class FormController {
 
     /**
      * Submit form data
-     * 
-     * @param formData The form submission data
+     *
+     * @param configName The name of the form configuration to use for validation
+     * @param formData   The form submission data
      * @return Response with success message or validation errors
      */
-    @PostMapping("/submit")
-    public ResponseEntity<Map<String, Object>> submitForm(@Valid @RequestBody FormSubmissionDTO formData) {
-        logger.info("Received form submission: {}", formData);
-        
+    @PostMapping("/submit/{configName}")
+    public ResponseEntity<Map<String, Object>> submitForm(
+            @PathVariable String configName,
+            @Valid @RequestBody FormSubmissionDTO formData) {
+        logger.info("Received form submission for config '{}': {}", configName, formData);
+
         // Perform JSON Logic validation
-        List<String> jsonLogicErrors = validationService.validateFormSubmission(formData);
-        
+        List<String> jsonLogicErrors = validationService.validateFormSubmission(configName, formData);
+
         if (!jsonLogicErrors.isEmpty()) {
-            logger.warn("JSON Logic validation failed: {}", jsonLogicErrors);
+            logger.warn("JSON Logic validation failed for config '{}': {}", configName, jsonLogicErrors);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("message", "Validation failed");
             errorResponse.put("errors", jsonLogicErrors);
             return ResponseEntity.badRequest().body(errorResponse);
         }
-        
+
         // If validation passes, process the form (e.g., save to database)
-        logger.info("Form validation successful. Processing submission...");
-        
+        logger.info("Form validation successful for config '{}'. Processing submission...", configName);
+
         // TODO: Add your business logic here (e.g., save to database, send email, etc.)
-        
+
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
         response.put("message", "Form submitted successfully!");
+        response.put("configName", configName);
         response.put("data", formData);
         response.put("submittedAt", new Date());
-        
+
         return ResponseEntity.ok(response);
     }
 
     /**
      * Get form configuration
      *
+     * @param configName The name of the form configuration to retrieve
      * @return The form configuration JSON
      */
-    @GetMapping("/config")
-    public ResponseEntity<FormConfig> getFormConfig() {
-        logger.info("Retrieving form configuration");
-        FormConfig config = validationService.getFormConfig();
+    @GetMapping("/config/{configName}")
+    public ResponseEntity<FormConfig> getFormConfig(@PathVariable String configName) {
+        logger.info("Retrieving form configuration '{}'", configName);
+        FormConfig config = validationService.getFormConfig(configName);
         return ResponseEntity.ok(config);
     }
 
@@ -94,27 +102,27 @@ public class FormController {
 
     /**
      * Exception handler for validation errors
-     * 
+     * <p>
      * Catches Bean Validation errors and returns them in a structured format
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> fieldErrors = new HashMap<>();
-        
+
         ex.getBindingResult().getAllErrors().forEach((error) -> {
             String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
             fieldErrors.put(fieldName, errorMessage);
         });
-        
+
         logger.warn("Bean validation failed: {}", fieldErrors);
-        
+
         Map<String, Object> response = new HashMap<>();
         response.put("success", false);
         response.put("message", "Validation failed");
         response.put("fieldErrors", fieldErrors);
-        
+
         return ResponseEntity.badRequest().body(response);
     }
 
@@ -125,12 +133,12 @@ public class FormController {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
         logger.error("Unexpected error occurred", ex);
-        
+
         Map<String, Object> response = new HashMap<>();
         response.put("success", false);
         response.put("message", "An unexpected error occurred");
         response.put("error", ex.getMessage());
-        
+
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 }
