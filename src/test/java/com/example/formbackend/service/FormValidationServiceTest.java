@@ -37,29 +37,31 @@ class FormValidationServiceTest {
     @Test
     void testFormConfigLoaded() {
         // Verify that form configuration was loaded successfully
-        FormConfig config = validationService.getFormConfig();
-        
+        FormConfig config = validationService.getFormConfig("form-config");
+
         assertNotNull(config, "Form configuration should be loaded");
+        assertNotNull(config.getConfigName(), "Config name should be set");
+        assertEquals("form-config", config.getConfigName(), "Config name should match file name");
         assertNotNull(config.getFields(), "Form fields should not be null");
         assertFalse(config.getFields().isEmpty(), "Form fields should not be empty");
-        
+
         // Verify expected fields are present
         assertTrue(config.getFields().stream()
-                .anyMatch(f -> "firstName".equals(f.getKey())), 
+                .anyMatch(f -> "firstName".equals(f.getKey())),
                 "firstName field should be present");
         assertTrue(config.getFields().stream()
-                .anyMatch(f -> "age".equals(f.getKey())), 
+                .anyMatch(f -> "age".equals(f.getKey())),
                 "age field should be present");
         assertTrue(config.getFields().stream()
-                .anyMatch(f -> "licenseNumber".equals(f.getKey())), 
+                .anyMatch(f -> "licenseNumber".equals(f.getKey())),
                 "licenseNumber field should be present");
     }
 
     @Test
     void testValidFormSubmission() {
         // Valid form for Canada (no age required)
-        List<String> errors = validationService.validateFormSubmission(validDto);
-        
+        List<String> errors = validationService.validateFormSubmission("form-config", validDto);
+
         assertTrue(errors.isEmpty(), "Valid form should have no errors");
     }
 
@@ -68,12 +70,12 @@ class FormValidationServiceTest {
         // US resident without age should fail
         validDto.setCountry("us");
         validDto.setAge(null);
-        
-        List<String> errors = validationService.validateFormSubmission(validDto);
-        
+
+        List<String> errors = validationService.validateFormSubmission("form-config", validDto);
+
         assertFalse(errors.isEmpty(), "Should have validation errors");
         assertTrue(errors.stream()
-                .anyMatch(e -> e.contains("Age") && e.contains("US")),
+                .anyMatch(e -> e.contains("âge") && e.contains("américains")),
                 "Should have age required error for US residents");
     }
 
@@ -82,9 +84,9 @@ class FormValidationServiceTest {
         // US resident with age should pass
         validDto.setCountry("us");
         validDto.setAge(25);
-        
-        List<String> errors = validationService.validateFormSubmission(validDto);
-        
+
+        List<String> errors = validationService.validateFormSubmission("form-config", validDto);
+
         assertTrue(errors.isEmpty(), "Valid US form with age should have no errors");
     }
 
@@ -93,9 +95,9 @@ class FormValidationServiceTest {
         // Non-US resident without age should pass
         validDto.setCountry("ca");
         validDto.setAge(null);
-        
-        List<String> errors = validationService.validateFormSubmission(validDto);
-        
+
+        List<String> errors = validationService.validateFormSubmission("form-config", validDto);
+
         assertTrue(errors.isEmpty(), "Age should not be required for non-US residents");
     }
 
@@ -105,12 +107,12 @@ class FormValidationServiceTest {
         validDto.setAge(25);
         validDto.setHasLicense(true);
         validDto.setLicenseNumber(null);
-        
-        List<String> errors = validationService.validateFormSubmission(validDto);
-        
+
+        List<String> errors = validationService.validateFormSubmission("form-config", validDto);
+
         assertFalse(errors.isEmpty(), "Should have validation errors");
         assertTrue(errors.stream()
-                .anyMatch(e -> e.contains("License number") || e.contains("license")),
+                .anyMatch(e -> e.contains("permis") && e.contains("requis")),
                 "Should have license number required error");
     }
 
@@ -120,9 +122,9 @@ class FormValidationServiceTest {
         validDto.setAge(25);
         validDto.setHasLicense(true);
         validDto.setLicenseNumber("ABC12345");
-        
-        List<String> errors = validationService.validateFormSubmission(validDto);
-        
+
+        List<String> errors = validationService.validateFormSubmission("form-config", validDto);
+
         assertTrue(errors.isEmpty(), "Valid form with license should have no errors");
     }
 
@@ -132,9 +134,9 @@ class FormValidationServiceTest {
         validDto.setAge(25);
         validDto.setHasLicense(false);
         validDto.setLicenseNumber(null);
-        
-        List<String> errors = validationService.validateFormSubmission(validDto);
-        
+
+        List<String> errors = validationService.validateFormSubmission("form-config", validDto);
+
         assertTrue(errors.isEmpty(), "License number should not be required when hasLicense is false");
     }
 
@@ -144,12 +146,12 @@ class FormValidationServiceTest {
         validDto.setAge(25);
         validDto.setEmploymentStatus("employed");
         validDto.setCompanyName(null);
-        
-        List<String> errors = validationService.validateFormSubmission(validDto);
-        
+
+        List<String> errors = validationService.validateFormSubmission("form-config", validDto);
+
         assertFalse(errors.isEmpty(), "Should have validation errors");
         assertTrue(errors.stream()
-                .anyMatch(e -> e.contains("Company") || e.contains("company")),
+                .anyMatch(e -> e.contains("entreprise") && e.contains("requis")),
                 "Should have company name required error");
     }
 
@@ -159,12 +161,12 @@ class FormValidationServiceTest {
         validDto.setAge(25);
         validDto.setEmploymentStatus("self-employed");
         validDto.setCompanyName(null);
-        
-        List<String> errors = validationService.validateFormSubmission(validDto);
-        
+
+        List<String> errors = validationService.validateFormSubmission("form-config", validDto);
+
         assertFalse(errors.isEmpty(), "Should have validation errors");
         assertTrue(errors.stream()
-                .anyMatch(e -> e.contains("Company") || e.contains("company")),
+                .anyMatch(e -> e.contains("entreprise") && e.contains("requis")),
                 "Should have company name required error");
     }
 
@@ -176,7 +178,7 @@ class FormValidationServiceTest {
         validDto.setCompanyName("Acme Corp");
         validDto.setAnnualIncome(50000.0); // Required for employed adults
 
-        List<String> errors = validationService.validateFormSubmission(validDto);
+        List<String> errors = validationService.validateFormSubmission("form-config", validDto);
 
         assertTrue(errors.isEmpty(), "Valid employed form should have no errors");
     }
@@ -187,9 +189,9 @@ class FormValidationServiceTest {
         validDto.setAge(25);
         validDto.setEmploymentStatus("unemployed");
         validDto.setCompanyName(null);
-        
-        List<String> errors = validationService.validateFormSubmission(validDto);
-        
+
+        List<String> errors = validationService.validateFormSubmission("form-config", validDto);
+
         assertTrue(errors.isEmpty(), "Company name should not be required for unemployed");
     }
 
@@ -200,12 +202,12 @@ class FormValidationServiceTest {
         validDto.setEmploymentStatus("employed");
         validDto.setCompanyName("Acme Corp");
         validDto.setAnnualIncome(null);
-        
-        List<String> errors = validationService.validateFormSubmission(validDto);
-        
+
+        List<String> errors = validationService.validateFormSubmission("form-config", validDto);
+
         assertFalse(errors.isEmpty(), "Should have validation errors");
         assertTrue(errors.stream()
-                .anyMatch(e -> e.contains("income") || e.contains("Income")),
+                .anyMatch(e -> e.contains("revenu") && e.contains("requis")),
                 "Should have annual income required error");
     }
 
@@ -215,12 +217,12 @@ class FormValidationServiceTest {
         validDto.setAge(65);
         validDto.setEmploymentStatus("retired");
         validDto.setAnnualIncome(null);
-        
-        List<String> errors = validationService.validateFormSubmission(validDto);
-        
+
+        List<String> errors = validationService.validateFormSubmission("form-config", validDto);
+
         assertFalse(errors.isEmpty(), "Should have validation errors");
         assertTrue(errors.stream()
-                .anyMatch(e -> e.contains("income") || e.contains("Income")),
+                .anyMatch(e -> e.contains("revenu") && e.contains("requis")),
                 "Should have annual income required error");
     }
 
@@ -231,9 +233,9 @@ class FormValidationServiceTest {
         validDto.setEmploymentStatus("employed");
         validDto.setCompanyName("Acme Corp");
         validDto.setAnnualIncome(50000.0);
-        
-        List<String> errors = validationService.validateFormSubmission(validDto);
-        
+
+        List<String> errors = validationService.validateFormSubmission("form-config", validDto);
+
         assertTrue(errors.isEmpty(), "Valid employed adult form should have no errors");
     }
 
@@ -243,9 +245,9 @@ class FormValidationServiceTest {
         validDto.setAge(20);
         validDto.setEmploymentStatus("student");
         validDto.setAnnualIncome(null);
-        
-        List<String> errors = validationService.validateFormSubmission(validDto);
-        
+
+        List<String> errors = validationService.validateFormSubmission("form-config", validDto);
+
         assertTrue(errors.isEmpty(), "Annual income should not be required for students");
     }
 
@@ -256,9 +258,9 @@ class FormValidationServiceTest {
         validDto.setAge(null);
         validDto.setHasLicense(true);
         validDto.setLicenseNumber(null);
-        
-        List<String> errors = validationService.validateFormSubmission(validDto);
-        
+
+        List<String> errors = validationService.validateFormSubmission("form-config", validDto);
+
         assertFalse(errors.isEmpty(), "Should have multiple validation errors");
         assertTrue(errors.size() >= 2, "Should have at least 2 errors");
     }
@@ -274,9 +276,9 @@ class FormValidationServiceTest {
         validDto.setCompanyName("Tech Corp");
         validDto.setAnnualIncome(75000.0);
         validDto.setComments("Test comments");
-        
-        List<String> errors = validationService.validateFormSubmission(validDto);
-        
+
+        List<String> errors = validationService.validateFormSubmission("form-config", validDto);
+
         assertTrue(errors.isEmpty(), "Complex valid form should have no errors");
     }
 
@@ -287,12 +289,12 @@ class FormValidationServiceTest {
         validDto.setAge(25);
         validDto.setHasLicense(true);
         validDto.setLicenseNumber(""); // Empty string
-        
-        List<String> errors = validationService.validateFormSubmission(validDto);
-        
+
+        List<String> errors = validationService.validateFormSubmission("form-config", validDto);
+
         assertFalse(errors.isEmpty(), "Empty string should be treated as missing value");
         assertTrue(errors.stream()
-                .anyMatch(e -> e.contains("License number") || e.contains("license")),
+                .anyMatch(e -> e.contains("permis") && e.contains("requis")),
                 "Should have license number required error");
     }
 }

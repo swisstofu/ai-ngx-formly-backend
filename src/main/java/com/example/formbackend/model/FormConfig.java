@@ -10,6 +10,9 @@ import java.util.List;
  */
 @Data
 public class FormConfig {
+    @JsonProperty("configName")
+    private String configName;
+
     @JsonProperty("fields")
     private List<FieldConfig> fields;
 }

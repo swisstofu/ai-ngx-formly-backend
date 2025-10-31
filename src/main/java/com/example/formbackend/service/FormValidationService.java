@@ -5,18 +5,19 @@ import com.example.formbackend.model.FieldConfig;
 import com.example.formbackend.model.FormConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.jamsesso.jsonlogic.JsonLogic;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Service for validating form submissions using JSON Logic
- *
+ * <p>
  * This service loads the form-config.json file and applies the same
  * JSON Logic rules used in the frontend to validate conditional
  * requirements on the backend.
@@ -25,10 +26,11 @@ import java.util.*;
 public class FormValidationService {
 
     private static final Logger logger = LoggerFactory.getLogger(FormValidationService.class);
+    private static final Set<String> CONFIG_FILE_NAMES = Set.of("form-config.json");
 
     private final JsonLogic jsonLogic;
     private final ObjectMapper objectMapper;
-    private FormConfig formConfig;
+    private Map<String, FormConfig> formConfigs;
 
     public FormValidationService() {
         this.jsonLogic = new JsonLogic();
@@ -40,25 +42,37 @@ public class FormValidationService {
      */
     @PostConstruct
     public void loadFormConfig() {
-        try {
-            ClassPathResource resource = new ClassPathResource("form-config.json");
-            formConfig = objectMapper.readValue(resource.getInputStream(), FormConfig.class);
-            logger.info("Successfully loaded form configuration with {} fields",
-                formConfig.getFields().size());
-        } catch (IOException e) {
-            logger.error("Failed to load form-config.json", e);
-            throw new RuntimeException("Failed to load form configuration", e);
-        }
+        formConfigs = CONFIG_FILE_NAMES.stream()
+                .collect(Collectors.toMap(
+                        fileName -> fileName.replace(".json", ""),  // Key: config name
+                        fileName -> {                                // Value: FormConfig
+                            try {
+                                ClassPathResource resource = new ClassPathResource(fileName);
+                                FormConfig config = objectMapper.readValue(resource.getInputStream(), FormConfig.class);
+                                String configName = fileName.replace(".json", "");
+                                config.setConfigName(configName);
+                                logger.info("Successfully loaded form configuration '{}' with {} fields",
+                                        configName, config.getFields().size());
+                                return config;
+                            } catch (IOException e) {
+                                logger.error("Failed to load {}", fileName, e);
+                                throw new RuntimeException("Failed to load form configuration: " + fileName, e);
+                            }
+                        }
+                ));
     }
 
     /**
      * Validates the form submission using JSON Logic rules from form-config.json
      *
+     * @param configName The name of the form configuration to use
      * @param dto The form submission data
      * @return List of validation error messages (empty if valid)
      */
-    public List<String> validateFormSubmission(FormSubmissionDTO dto) {
+    public List<String> validateFormSubmission(String configName, FormSubmissionDTO dto) {
         List<String> errors = new ArrayList<>();
+
+        FormConfig formConfig = formConfigs.get(configName);
 
         // Convert DTO to Map for JSON Logic evaluation
         Map<String, Object> model = convertDtoToMap(dto);
@@ -66,19 +80,19 @@ public class FormValidationService {
         // Iterate through all fields and check conditional requirements
         for (FieldConfig field : formConfig.getFields()) {
             if (field.getExpressions() != null &&
-                field.getExpressions().containsKey("props.required")) {
+                    field.getExpressions().containsKey("props.required")) {
 
                 // Check if field is conditionally required
                 boolean isRequired = evaluateJsonLogic(
-                    field.getExpressions().get("props.required").getJsonLogic(),
-                    model
+                        field.getExpressions().get("props.required").getJsonLogic(),
+                        model
                 );
 
                 if (isRequired) {
                     // Check if the field value is present
                     Object fieldValue = model.get(field.getKey());
                     if (fieldValue == null ||
-                        (fieldValue instanceof String && ((String) fieldValue).isEmpty())) {
+                            (fieldValue instanceof String && ((String) fieldValue).isEmpty())) {
 
                         // Get custom error message from validation config
                         String errorMessage = getErrorMessage(field, "required");
@@ -95,7 +109,7 @@ public class FormValidationService {
      * Evaluate a JSON Logic expression
      *
      * @param jsonLogicRule The JSON Logic rule as a Map
-     * @param data The data model to evaluate against
+     * @param data          The data model to evaluate against
      * @return true if the expression evaluates to true, false otherwise
      */
     private boolean evaluateJsonLogic(Map<String, Object> jsonLogicRule, Map<String, Object> data) {
@@ -121,13 +135,13 @@ public class FormValidationService {
     /**
      * Get error message for a field validation
      *
-     * @param field The field configuration
+     * @param field          The field configuration
      * @param validationType The type of validation (e.g., "required", "pattern")
      * @return The error message
      */
     private String getErrorMessage(FieldConfig field, String validationType) {
         if (field.getValidation() != null &&
-            field.getValidation().containsKey("messages")) {
+                field.getValidation().containsKey("messages")) {
 
             @SuppressWarnings("unchecked")
             Map<String, String> messages = (Map<String, String>) field.getValidation().get("messages");
@@ -139,8 +153,8 @@ public class FormValidationService {
 
         // Default error message
         String label = field.getProps() != null && field.getProps().containsKey("label")
-            ? (String) field.getProps().get("label")
-            : field.getKey();
+                ? (String) field.getProps().get("label")
+                : field.getKey();
 
         return label + " is required";
     }
@@ -155,8 +169,8 @@ public class FormValidationService {
     /**
      * Get the loaded form configuration (for testing/debugging)
      */
-    public FormConfig getFormConfig() {
-        return formConfig;
+    public FormConfig getFormConfig(String configName) {
+        return formConfigs.get(configName);
     }
 }
 

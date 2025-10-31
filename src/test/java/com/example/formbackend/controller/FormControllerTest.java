@@ -8,19 +8,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Unit tests for FormController
@@ -49,6 +50,7 @@ class FormControllerTest {
     void testGetFormConfig() throws Exception {
         // Arrange - Create a mock form config
         FormConfig mockConfig = new FormConfig();
+        mockConfig.setConfigName("form-config");
         FieldConfig field1 = new FieldConfig();
         field1.setKey("firstName");
         field1.setType("input");
@@ -59,11 +61,12 @@ class FormControllerTest {
 
         mockConfig.setFields(Arrays.asList(field1, field2));
 
-        when(validationService.getFormConfig()).thenReturn(mockConfig);
+        when(validationService.getFormConfig(eq("form-config"))).thenReturn(mockConfig);
 
         // Act & Assert
-        mockMvc.perform(get("/forms/config"))
+        mockMvc.perform(get("/forms/config/form-config"))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.configName").value("form-config"))
                 .andExpect(jsonPath("$.fields").isArray())
                 .andExpect(jsonPath("$.fields[0].key").value("firstName"))
                 .andExpect(jsonPath("$.fields[1].key").value("lastName"));
@@ -79,15 +82,16 @@ class FormControllerTest {
         dto.setCountry("us");
         dto.setAge(25);
 
-        when(validationService.validateFormSubmission(any())).thenReturn(new ArrayList<>());
+        when(validationService.validateFormSubmission(eq("form-config"), any())).thenReturn(new ArrayList<>());
 
         // Act & Assert
-        mockMvc.perform(post("/forms/submit")
+        mockMvc.perform(post("/forms/submit/form-config")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("Form submitted successfully!"))
+                .andExpect(jsonPath("$.configName").value("form-config"))
                 .andExpect(jsonPath("$.data.firstName").value("John"))
                 .andExpect(jsonPath("$.data.lastName").value("Doe"));
     }
@@ -100,7 +104,7 @@ class FormControllerTest {
         dto.setEmail("invalid-email"); // Invalid format
 
         // Act & Assert
-        mockMvc.perform(post("/forms/submit")
+        mockMvc.perform(post("/forms/submit/form-config")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest())
@@ -119,11 +123,11 @@ class FormControllerTest {
         dto.setCountry("us");
         // Missing age (required for US residents)
 
-        when(validationService.validateFormSubmission(any()))
+        when(validationService.validateFormSubmission(eq("form-config"), any()))
                 .thenReturn(Arrays.asList("Age is required for US residents"));
 
         // Act & Assert
-        mockMvc.perform(post("/forms/submit")
+        mockMvc.perform(post("/forms/submit/form-config")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest())
@@ -144,14 +148,15 @@ class FormControllerTest {
         dto.setHasLicense(true);
         dto.setLicenseNumber("ABC123"); // Valid format
 
-        when(validationService.validateFormSubmission(any())).thenReturn(new ArrayList<>());
+        when(validationService.validateFormSubmission(eq("form-config"), any())).thenReturn(new ArrayList<>());
 
         // Act & Assert
-        mockMvc.perform(post("/forms/submit")
+        mockMvc.perform(post("/forms/submit/form-config")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.configName").value("form-config"));
     }
 }
 
