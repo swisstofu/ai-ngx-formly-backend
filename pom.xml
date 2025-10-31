@@ -19,7 +19,7 @@
     <description>Backend API for dynamic form submission with JSON Logic validation</description>
     
     <properties>
-        <java.version>21</java.version>
+        <java.version>25</java.version>
         <json-logic.version>1.0.6</json-logic.version>
         <mockito.version>5.15.2</mockito.version>
         <byte-buddy.version>1.15.11</byte-buddy.version>
