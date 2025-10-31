@@ -13,7 +13,7 @@ A Spring Boot REST API for handling dynamic form submissions with JSON Logic-bas
 
 ## Technology Stack
 
-- **Java 17**
+- **Java 21 (OpenJDK)**
 - **Spring Boot 3.2.0**
 - **Spring Web** - REST API
 - **Spring Validation** - Bean Validation
@@ -132,7 +132,7 @@ backend/
 
 ### Prerequisites
 
-- Java 17 or higher
+- Java 21 (OpenJDK) or higher
 - Maven 3.6 or higher
 
 ### Installation
