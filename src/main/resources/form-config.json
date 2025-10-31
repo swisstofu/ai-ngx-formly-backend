@@ -1,0 +1,263 @@
+{
+  "fields": [
+    {
+      "key": "firstName",
+      "type": "input",
+      "props": {
+        "label": "Prénom",
+        "placeholder": "Enter first name",
+        "required": true,
+        "minLength": 2,
+        "pattern": "^[a-zA-ZÀ-ÿ\\s'-]+$"
+      },
+      "validation": {
+        "messages": {
+          "pattern": "Only letters, spaces, hyphens, and apostrophes are allowed",
+          "minLength": "First name must be at least 2 characters",
+          "required": "First name is required"
+        }
+      }
+    },
+    {
+      "key": "lastName",
+      "type": "input",
+      "props": {
+        "label": "Last Name",
+        "placeholder": "Enter last name",
+        "required": true,
+        "minLength": 2,
+        "pattern": "^[a-zA-ZÀ-ÿ\\s'-]+$"
+      },
+      "validation": {
+        "messages": {
+          "pattern": "Only letters, spaces, hyphens, and apostrophes are allowed",
+          "minLength": "Last name must be at least 2 characters",
+          "required": "Last name is required"
+        }
+      }
+    },
+    {
+      "key": "email",
+      "type": "input",
+      "props": {
+        "label": "Email",
+        "placeholder": "Enter email",
+        "type": "email",
+        "required": true,
+        "pattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"
+      },
+      "validation": {
+        "messages": {
+          "pattern": "Please enter a valid email address",
+          "required": "Email is required"
+        }
+      }
+    },
+    {
+      "key": "country",
+      "type": "select",
+      "props": {
+        "label": "Country",
+        "placeholder": "Select country",
+        "required": true,
+        "options": [
+          { "label": "United States", "value": "us" },
+          { "label": "Canada", "value": "ca" },
+          { "label": "United Kingdom", "value": "uk" },
+          { "label": "Germany", "value": "de" },
+          { "label": "France", "value": "fr" }
+        ]
+      },
+      "validation": {
+        "messages": {
+          "required": "Please select a country"
+        }
+      }
+    },
+    {
+      "key": "state",
+      "type": "select",
+      "props": {
+        "label": "State/Province",
+        "placeholder": "Select state",
+        "options": [
+          { "label": "California", "value": "ca" },
+          { "label": "New York", "value": "ny" },
+          { "label": "Texas", "value": "tx" },
+          { "label": "Florida", "value": "fl" }
+        ]
+      },
+      "expressions": {
+        "hide": {
+          "jsonLogic": {
+            "!": {
+              "in": [{ "var": "model.country" }, ["us", "ca"]]
+            }
+          }
+        }
+      }
+    },
+    {
+      "key": "age",
+      "type": "input",
+      "props": {
+        "label": "Age",
+        "placeholder": "Enter age",
+        "type": "number",
+        "min": 0,
+        "max": 120
+      },
+      "validation": {
+        "messages": {
+          "required": "Age is required for US residents",
+          "min": "Age must be at least 0",
+          "max": "Age must be less than 120"
+        }
+      },
+      "expressions": {
+        "props.required": {
+          "jsonLogic": {
+            "===": [{ "var": "model.country" }, "us"]
+          }
+        }
+      }
+    },
+    {
+      "key": "hasLicense",
+      "type": "checkbox",
+      "props": {
+        "label": "Do you have a driver's license?"
+      },
+      "expressions": {
+        "hide": {
+          "jsonLogic": {
+            "<": [{ "var": "model.age" }, 16]
+          }
+        }
+      }
+    },
+    {
+      "key": "licenseNumber",
+      "type": "input",
+      "props": {
+        "label": "License Number",
+        "placeholder": "Enter license number",
+        "pattern": "^[A-Z0-9]{6,12}$"
+      },
+      "validation": {
+        "messages": {
+          "pattern": "License number must be 6-12 uppercase letters or numbers",
+          "required": "License number is required"
+        }
+      },
+      "expressions": {
+        "hide": {
+          "jsonLogic": {
+            "!": { "var": "model.hasLicense" }
+          }
+        },
+        "props.required": {
+          "jsonLogic": {
+            "==": [{ "var": "model.hasLicense" }, true]
+          }
+        }
+      }
+    },
+    {
+      "key": "employmentStatus",
+      "type": "select",
+      "props": {
+        "label": "Employment Status",
+        "placeholder": "Select employment status",
+        "options": [
+          { "label": "Employed", "value": "employed" },
+          { "label": "Self-Employed", "value": "self-employed" },
+          { "label": "Unemployed", "value": "unemployed" },
+          { "label": "Student", "value": "student" },
+          { "label": "Retired", "value": "retired" }
+        ]
+      },
+      "expressions": {
+        "props.disabled": {
+          "jsonLogic": {
+            "<": [{ "var": "model.age" }, 18]
+          }
+        }
+      }
+    },
+    {
+      "key": "companyName",
+      "type": "input",
+      "props": {
+        "label": "Company Name",
+        "placeholder": "Enter company name",
+        "minLength": 2
+      },
+      "expressions": {
+        "hide": {
+          "jsonLogic": {
+            "!": {
+              "in": [
+                { "var": "model.employmentStatus" },
+                ["employed", "self-employed"]
+              ]
+            }
+          }
+        },
+        "props.required": {
+          "jsonLogic": {
+            "in": [
+              { "var": "model.employmentStatus" },
+              ["employed", "self-employed"]
+            ]
+          }
+        }
+      }
+    },
+    {
+      "key": "annualIncome",
+      "type": "input",
+      "props": {
+        "label": "Annual Income",
+        "placeholder": "Enter annual income",
+        "type": "number",
+        "min": 0
+      },
+      "expressions": {
+        "hide": {
+          "jsonLogic": {
+            "!": {
+              "in": [
+                { "var": "model.employmentStatus" },
+                ["employed", "self-employed", "retired"]
+              ]
+            }
+          }
+        },
+        "props.required": {
+          "jsonLogic": {
+            "and": [
+              {
+                "in": [
+                  { "var": "model.employmentStatus" },
+                  ["employed", "self-employed", "retired"]
+                ]
+              },
+              { ">=": [{ "var": "model.age" }, 18] }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "key": "comments",
+      "type": "textarea",
+      "props": {
+        "label": "Additional Comments",
+        "placeholder": "Enter any additional information",
+        "rows": 4
+      }
+    }
+  ]
+}
+

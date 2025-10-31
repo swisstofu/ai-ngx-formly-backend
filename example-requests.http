@@ -1,0 +1,159 @@
+### Health Check
+GET http://localhost:8080/api/forms/health
+
+###
+
+### Get Form Configuration
+GET http://localhost:8080/api/forms/config
+
+###
+
+### Submit Valid Form - Basic
+POST http://localhost:8080/api/forms/submit
+Content-Type: application/json
+
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@example.com",
+  "country": "ca"
+}
+
+###
+
+### Submit Valid Form - US Resident with Age
+POST http://localhost:8080/api/forms/submit
+Content-Type: application/json
+
+{
+  "firstName": "Jane",
+  "lastName": "Smith",
+  "email": "jane.smith@example.com",
+  "country": "us",
+  "state": "ca",
+  "age": 25
+}
+
+###
+
+### Submit Valid Form - Complete with License
+POST http://localhost:8080/api/forms/submit
+Content-Type: application/json
+
+{
+  "firstName": "Robert",
+  "lastName": "Johnson",
+  "email": "robert.johnson@example.com",
+  "country": "us",
+  "state": "ny",
+  "age": 30,
+  "hasLicense": true,
+  "licenseNumber": "ABC123456",
+  "employmentStatus": "employed",
+  "companyName": "Tech Corp",
+  "annualIncome": 75000,
+  "comments": "This is a test submission"
+}
+
+###
+
+### Submit Invalid Form - Missing Required Fields
+POST http://localhost:8080/api/forms/submit
+Content-Type: application/json
+
+{
+  "firstName": "J",
+  "email": "invalid-email"
+}
+
+###
+
+### Submit Invalid Form - US Resident without Age
+POST http://localhost:8080/api/forms/submit
+Content-Type: application/json
+
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@example.com",
+  "country": "us"
+}
+
+###
+
+### Submit Invalid Form - Has License but No License Number
+POST http://localhost:8080/api/forms/submit
+Content-Type: application/json
+
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@example.com",
+  "country": "ca",
+  "age": 25,
+  "hasLicense": true
+}
+
+###
+
+### Submit Invalid Form - Invalid Name Pattern
+POST http://localhost:8080/api/forms/submit
+Content-Type: application/json
+
+{
+  "firstName": "John123",
+  "lastName": "Doe@#$",
+  "email": "john.doe@example.com",
+  "country": "ca"
+}
+
+###
+
+### Submit Invalid Form - Invalid License Number Format
+POST http://localhost:8080/api/forms/submit
+Content-Type: application/json
+
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@example.com",
+  "country": "ca",
+  "age": 25,
+  "hasLicense": true,
+  "licenseNumber": "abc123"
+}
+
+###
+
+### Submit Valid Form - Employed with Company
+POST http://localhost:8080/api/forms/submit
+Content-Type: application/json
+
+{
+  "firstName": "Alice",
+  "lastName": "Williams",
+  "email": "alice.williams@example.com",
+  "country": "uk",
+  "age": 28,
+  "employmentStatus": "employed",
+  "companyName": "Software Inc",
+  "annualIncome": 65000
+}
+
+###
+
+### Submit Invalid Form - Employed without Company Name
+POST http://localhost:8080/api/forms/submit
+Content-Type: application/json
+
+{
+  "firstName": "Bob",
+  "lastName": "Brown",
+  "email": "bob.brown@example.com",
+  "country": "de",
+  "age": 35,
+  "employmentStatus": "employed"
+}
+
+###
+
