@@ -21,6 +21,8 @@
     <properties>
         <java.version>21</java.version>
         <json-logic.version>1.0.6</json-logic.version>
+        <!-- Override logback versions to fix CVE-2023-6378 and CVE-2024-12798 -->
+        <logback.version>1.5.20</logback.version>
     </properties>
     
     <dependencies>
